@@ -1,0 +1,17 @@
+[package]
+name = "divina_config"
+version = "0.1.0"
+authors = ["Fuwn <contact@fuwn.me>"]
+edition = "2021"
+description = "Divina's configuration system"
+readme = "README.rst"
+homepage = "https://divina.land"
+repository = "https://github.com/divinaland/Divina"
+license = "GPL-3.0-only"
+keywords = ["divina", "buildsystem", "build", "assembly", "asm", "nasm", "yasm"]
+categories = ["development-tools::build-utils"]
+publish = false
+
+[dependencies]
+# Lua
+rlua = "0.19.0"

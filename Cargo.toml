@@ -1,0 +1,14 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+members = [
+  "crates/divina",
+  "crates/divina_config",
+  "crates/divina_git",
+  "crates/divina_compile"
+]
+
+# Slower builds, faster executables
+[profile.release]
+lto = "fat"
+codegen-units = 1

@@ -1,0 +1,16 @@
+[package]
+name = "divina_git"
+version = "0.1.0"
+authors = ["Fuwn <contact@fuwn.me>"]
+edition = "2021"
+description = "Divina's Git wrapper"
+readme = "../../README.rst"
+homepage = "https://divina.land"
+repository = "https://github.com/divinaland/Divina"
+license = "GPL-3.0-only"
+keywords = ["divina", "buildsystem", "build", "assembly", "asm", "nasm", "yasm"]
+categories = ["development-tools::build-utils"]
+publish = false
+
+[dependencies]
+git2 = "0.13.25"

@@ -1,0 +1,49 @@
+name: Release ⚾
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout 🛒
+        uses: actions/checkout@v2
+
+      - name: Toolchain 🧰
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2021-12-04
+          components: rustfmt, clippy
+          override: true
+
+      - name: Build 🏗
+        uses: actions-rs/cargo@v1
+        continue-on-error: false
+        with:
+          command: build
+          args: --release
+
+      - name: Create Release 🏉
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Artifacts to Release 💎
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/release/divina
+          asset_name: divina
+          asset_content_type: application/x-elf # x-msdownload for Windows
