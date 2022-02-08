@@ -18,7 +18,6 @@ fn cli() -> App<'static, 'static> {
           .possible_values(&["bin", "lib"]),
         Arg::with_name("git").long("git").takes_value(true),
         Arg::with_name("path")
-          .required(true)
           .index(1)
           .takes_value(true),
       ]),
@@ -48,7 +47,7 @@ pub fn execute(divina: &mut crate::Divina) {
       let repository = s_matches
         .value_of("git")
         .unwrap_or("https://github.com/divinaland/init.git");
-      let path = s_matches.value_of("path").unwrap_or_else(|| unreachable!());
+      let path = s_matches.value_of("path").unwrap_or(".");
 
       divina_git::clone(repository, &format!("./{}", path))
         .expect("!! could to clone init repository, perhaps the repository is invalid ?");
