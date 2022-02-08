@@ -17,9 +17,7 @@ fn cli() -> App<'static, 'static> {
           .takes_value(true)
           .possible_values(&["bin", "lib"]),
         Arg::with_name("git").long("git").takes_value(true),
-        Arg::with_name("path")
-          .index(1)
-          .takes_value(true),
+        Arg::with_name("path").index(1).takes_value(true),
       ]),
       SubCommand::with_name("build").about("Build your project"),
       SubCommand::with_name("clean")
@@ -30,6 +28,12 @@ fn cli() -> App<'static, 'static> {
         .subcommands(vec![
           SubCommand::with_name("show").about("Print your configuration"),
           SubCommand::with_name("validate").about("Check if your configuration will compile"),
+          SubCommand::with_name("compiler")
+            .about("Access the Divina compiler wrapper")
+            .setting(AppSettings::SubcommandRequiredElseHelp)
+            .subcommands(vec![
+              SubCommand::with_name("show").about("Print Divina's compiler configuration")
+            ]),
         ]),
     ])
     .args(&[
@@ -71,6 +75,16 @@ pub fn execute(divina: &mut crate::Divina) {
       match s_matches.subcommand() {
         ("show", _) => divina.print_config(),
         ("validate", _) => println!(":: no issues found"),
+        ("compiler", Some(s_s_matches)) =>
+          match s_s_matches.subcommand() {
+            ("show", _) => {
+              let _ = divina
+                .compiler
+                .find_sources(&divina.expose_config().clone())
+                .print_config();
+            }
+            _ => unreachable!(),
+          },
         _ => unreachable!(),
       },
     _ => unreachable!(),

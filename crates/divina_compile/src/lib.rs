@@ -283,6 +283,13 @@ impl Compiler {
       }
     }
   }
+
+  #[must_use]
+  pub fn print_config(&self) -> &Self {
+    println!("{:?}", self);
+
+    self
+  }
 }
 
 #[cfg(windows)]
