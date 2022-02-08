@@ -46,13 +46,13 @@ fn print(state: &mut State) {
       state.newline = true;
     }
     print!(
-      "Resolving deltas {}/{}\r",
+      ":: resolving deltas {}/{}\r",
       git_stats.indexed_deltas(),
       git_stats.total_deltas()
     );
   } else {
     print!(
-      "net {:3}% ({:4} kb, {:5}/{:5})  /  idx {:3}% ({:5}/{:5})  /  chk {:3}% ({:4}/{:4}) {}\r",
+      ":: net {:3}% ({:4} kb, {:5}/{:5}) / idx {:3}% ({:5}/{:5}) / chk {:3}% ({:4}/{:4}) {}\r",
       network_pct,
       kbytes,
       git_stats.received_objects(),
