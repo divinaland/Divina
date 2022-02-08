@@ -47,23 +47,23 @@ pub fn execute(divina: &mut crate::Divina) {
   let matches = cli().get_matches();
 
   match matches.subcommand() {
-    ("init", Some(s_matches)) => {
-      let repository = s_matches
+    ("init", Some(init_matches)) => {
+      let repository = init_matches
         .value_of("git")
         .unwrap_or("https://github.com/divinaland/init.git");
-      let path = s_matches.value_of("path").unwrap_or(".");
+      let path = init_matches.value_of("path").unwrap_or(".");
 
       divina_git::clone(repository, &format!("./{}", path))
         .expect("!! could to clone init repository, perhaps the repository is invalid ?");
     }
-    ("build", Some(_s_matches)) => {
+    ("build", Some(_build_matches)) => {
       divina
         .compiler
         .find_sources(&divina.expose_config().clone())
         .compile()
         .link();
     }
-    ("clean", Some(_s_matches)) =>
+    ("clean", Some(_clean_matches)) =>
       if std::path::Path::new("out/").exists() {
         println!(":: removing directory 'out/'");
         std::fs::remove_dir_all("out/")
@@ -71,12 +71,12 @@ pub fn execute(divina: &mut crate::Divina) {
       } else {
         println!(":: directory 'out/' does not exist");
       },
-    ("config", Some(s_matches)) =>
-      match s_matches.subcommand() {
+    ("config", Some(config_matches)) =>
+      match config_matches.subcommand() {
         ("show", _) => divina.print_config(),
         ("validate", _) => println!(":: no issues found"),
-        ("compiler", Some(s_s_matches)) =>
-          match s_s_matches.subcommand() {
+        ("compiler", Some(config_compiler_matches)) =>
+          match config_compiler_matches.subcommand() {
             ("show", _) => {
               let _ = divina
                 .compiler
