@@ -16,6 +16,7 @@
   html_favicon_url = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/ribbon_1f380.png"
 )]
 
+/// https://stackoverflow.com/a/32289869/14452787
 #[macro_export]
 macro_rules! exit_with {
   ($exit_code:expr) => {
