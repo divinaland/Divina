@@ -37,7 +37,8 @@ struct Package {
 
 #[derive(Default, Debug)]
 pub struct Compiler {
-  sources: Vec<Package>,
+  sources:    Vec<Package>,
+  is_package: bool,
 }
 impl Compiler {
   #[must_use]
@@ -123,20 +124,19 @@ impl Compiler {
         .for_each(|source| {
           if !source.is_empty() {
             package.sources.push(Source {
-              path:     format!(
-                "{}/{}",
-                config
-                  .path
-                  .as_ref()
-                  .expect("!! could not access 'Config.path', this *shouldn't* be possible"),
-                source
-              ),
+              path:     source.to_string(),
               filename: {
                 let mut sources = source.split('.');
                 // Remove the file extension
                 sources.next_back();
 
-                sources.collect()
+                let sources_no_extension = sources.collect::<String>();
+                sources = sources_no_extension.split('/');
+
+                sources
+                  .next_back()
+                  .expect("!! could not get filename from source, this is an anomaly")
+                  .to_string()
               },
             });
           }
@@ -144,6 +144,8 @@ impl Compiler {
 
       self.sources.push(package);
     }
+
+    self.is_package = self.sources.len() == 1;
 
     self
   }
@@ -158,15 +160,21 @@ impl Compiler {
     }
 
     for package in &self.sources {
-      if !std::path::Path::new(&format!("out/{}/", package.name)).exists() {
+      let package_out_directory = if self.is_package {
+        "out/".to_string()
+      } else {
+        format!("out/{}/", package.name)
+      };
+
+      if !std::path::Path::new(&package_out_directory).exists() {
         println!(
-          ":: {} @@ creating directory 'out/{}/'",
-          package.name, package.name
+          ":: {} @@ creating directory '{}'",
+          package.name, package_out_directory
         );
-        fs::create_dir_all(&format!("out/{}/", package.name)).unwrap_or_else(|_| {
+        fs::create_dir_all(&package_out_directory).unwrap_or_else(|_| {
           panic!(
-            "!! could not create directory 'out/{}/', check permissions",
-            package.name
+            "!! could not create directory '{}', check permissions",
+            package_out_directory
           )
         });
       }
@@ -188,7 +196,11 @@ impl Compiler {
             },
             &source.path,
             "-o",
-            &format!("out/{}/{}.o", package.name, source.filename),
+            if self.is_package {
+              &format!("out/{}.o", source.filename)
+            } else {
+              &format!("out/{}/{}.o", package.name, source.filename)
+            },
           ])
           .output()
           .expect(&format!(
@@ -207,7 +219,11 @@ impl Compiler {
             },
             &source.path,
             "-o",
-            &format!("out/{}/{}.obj", package.name, source.filename),
+            &if self.is_package {
+              format!("out/{}.obj", source.filename)
+            } else {
+              format!("out/{}/{}.obj", package.name, source.filename)
+            },
           ])
           .output()
           .unwrap_or_else(|_| {
@@ -231,33 +247,53 @@ impl Compiler {
       let mut arch = &Arch::X86;
 
       for source in &package.sources {
-        filenames.push(format!("out/{}/{}.{}", package.name, source.filename, {
-          if cfg!(windows) {
-            "obj"
+        filenames.push(format!(
+          "out/{}{}.{}",
+          &if self.is_package {
+            "".to_string()
           } else {
-            "o"
+            format!("{}/", &package.name)
+          },
+          source.filename,
+          {
+            if cfg!(windows) {
+              "obj"
+            } else {
+              "o"
+            }
           }
-        }));
+        ));
 
         #[allow(unused)]
         arch = &package.arch;
       }
 
+      #[cfg(windows)]
+      println!(
+        ":: {} @@ entering visual studio 2019 developer command prompt environment",
+        package.name
+      );
+
+      println!(
+        ":: {} @@ linking source{}: '{}'",
+        package.name,
+        if filenames.len() > 1 { "s" } else { "" },
+        filenames.join("', '")
+      );
+
       #[cfg(unix)]
       {
-        println!(
-          ":: {} @@ linking sources: '{}'",
-          package.name,
-          filenames.join("', '")
-        );
-
         Command::new("ld")
           .args([
             "-dynamic-linker",
             "/lib64/ld-linux-x86-64.so.2",
             "-lc",
             "-o",
-            &format!("out/{}/{}", package.name, package.name),
+            if self.is_package {
+              &format!("out/{}", package.name)
+            } else {
+              &format!("out/{}/{}", package.name, package.name)
+            },
           ])
           .args(filenames.iter())
           .output()
@@ -266,19 +302,16 @@ impl Compiler {
 
       #[cfg(windows)]
       {
-        println!(
-          ":: {} @@ entering visual studio 2019 developer command prompt environment",
-          package.name
-        );
-        println!(
-          ":: {} @@ linking sources: '{}'",
-          package.name,
-          filenames.join("', '")
-        );
         if arch == &Arch::X64 {
-          windows::link_64(&filenames.join(" "), &package.name);
+          if self.is_package {
+            windows::link_package_64(&filenames.join(" "), &package.name);
+          } else {
+            windows::link_workspace_64(&filenames.join(" "), &package.name);
+          }
+        } else if self.is_package {
+          windows::link_package_32(&filenames.join(" "), &package.name);
         } else {
-          windows::link_32(&filenames.join(" "), &package.name);
+          windows::link_workspace_32(&filenames.join(" "), &package.name);
         }
       }
     }
@@ -304,11 +337,19 @@ mod windows {
   ///
   /// Thanks, shellfn.
   #[shellfn::shell(cmd = "powershell")]
-  pub fn link_32(objects: &str, filename: &str) -> String { r#"
+  pub fn link_workspace_32(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
   "# }
   #[shellfn::shell(cmd = "powershell")]
-  pub fn link_64(objects: &str, filename: &str) -> String { r#"
+  pub fn link_workspace_64(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+  "# }
+  #[shellfn::shell(cmd = "powershell")]
+  pub fn link_package_32(objects: &str, filename: &str) -> String { r#"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+  "# }
+  #[shellfn::shell(cmd = "powershell")]
+  pub fn link_package_64(objects: &str, filename: &str) -> String { r#"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
   "# }
 }
