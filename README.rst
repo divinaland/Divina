@@ -37,7 +37,7 @@ If you are building and installing yourself, you must have
 Usage
 ^^^^^
 
-Usage documentation is available on `divina.land <divina.land>`_.
+Usage documentation is available on `divina.land <https://divina.land>`_.
 
 Prebuilt Binaries
 """""""""""""""""
