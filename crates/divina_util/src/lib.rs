@@ -17,6 +17,8 @@
 )]
 
 /// https://stackoverflow.com/a/32289869/14452787
+///
+/// and some help from <https://dev.to/rogertorres/first-steps-with-rust-declarative-macros-1f8m>
 #[macro_export]
 macro_rules! exit_with {
   ($exit_code:expr) => {
