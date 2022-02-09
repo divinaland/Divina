@@ -196,10 +196,10 @@ impl Compiler {
             },
             &source.path,
             "-o",
-            if self.is_package {
-              &format!("out/{}.o", source.filename)
+            &if self.is_package {
+              format!("out/{}.o", source.filename)
             } else {
-              &format!("out/{}/{}.o", package.name, source.filename)
+              format!("out/{}/{}.o", package.name, source.filename)
             },
           ])
           .output()
@@ -289,10 +289,10 @@ impl Compiler {
             "/lib64/ld-linux-x86-64.so.2",
             "-lc",
             "-o",
-            if self.is_package {
-              &format!("out/{}", package.name)
+            &if self.is_package {
+              format!("out/{}", package.name)
             } else {
-              &format!("out/{}/{}", package.name, package.name)
+              format!("out/{}/{}", package.name, package.name)
             },
           ])
           .args(filenames.iter())
