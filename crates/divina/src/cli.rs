@@ -56,12 +56,11 @@ pub fn execute(divina: &mut crate::Divina) {
       let path = init_matches.value_of("path").unwrap_or(".");
 
       if Path::new("Divina.lua").exists() {
-        println!(
+        divina_util::exit_with!(
+          1,
           "!! could not clone init repository to '{}', a 'Divina.lua' already exists",
           path
         );
-
-        std::process::exit(1);
       }
 
       divina_git::clone(repository, &format!("./{}", path))

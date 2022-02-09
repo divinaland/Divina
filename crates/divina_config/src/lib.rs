@@ -274,12 +274,12 @@ impl Config {
       } else if globals.get::<_, Table<'_>>("Package").is_ok() {
         ConfigType::Package
       } else {
-        println!(
+        divina_util::exit_with!(
+          1,
           "!! '{}' is neither `Workspace` nor `Package`, perhaps you've forgotten to assign to it \
            ?",
           file
         );
-        std::process::exit(0);
       };
 
       if self.config_type == ConfigType::Package {

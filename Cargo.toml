@@ -5,7 +5,8 @@ members = [
   "crates/divina",
   "crates/divina_config",
   "crates/divina_git",
-  "crates/divina_compile"
+  "crates/divina_compile",
+  "crates/divina_util"
 ]
 
 # Slower builds, faster executables

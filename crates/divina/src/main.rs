@@ -15,8 +15,4 @@ async fn main() {
   divina.configure_compiler(divina_compile::Compiler::new());
   // Handle CLI
   divina.perform();
-
-  // Process doesn't exit on Unix properly, this solves it...
-  #[cfg(unix)]
-  std::process::exit(0);
 }

@@ -36,6 +36,9 @@ human-panic = "1.0.3"
 # Compilation
 divina_compile = { path = "../divina_compile" }
 
+# Utility
+divina_util = { path = "../divina_util" }
+
 [target.'cfg(windows)'.dependencies]
 # Allocator
 mimalloc = { version = "0.1.26", default-features = false }
