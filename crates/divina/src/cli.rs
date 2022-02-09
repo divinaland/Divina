@@ -1,6 +1,8 @@
 // Copyright (C) 2022-2022 Fuwn <contact@fuwn.me>
 // SPDX-License-Identifier: GPL-3.0-only
 
+use std::path::Path;
+
 use structopt::clap::{App, AppSettings, Arg, SubCommand};
 
 /// Create CLI
@@ -53,8 +55,17 @@ pub fn execute(divina: &mut crate::Divina) {
         .unwrap_or("https://github.com/divinaland/init.git");
       let path = init_matches.value_of("path").unwrap_or(".");
 
+      if Path::new("Divina.lua").exists() {
+        println!(
+          "!! could not clone init repository to '{}', a 'Divina.lua' already exists",
+          path
+        );
+
+        std::process::exit(1);
+      }
+
       divina_git::clone(repository, &format!("./{}", path))
-        .expect("!! could to clone init repository, perhaps the repository is invalid ?");
+        .expect("!! could not clone init repository, perhaps the repository is invalid ?");
     }
     ("build", Some(_build_matches)) => {
       divina
@@ -64,7 +75,7 @@ pub fn execute(divina: &mut crate::Divina) {
         .link();
     }
     ("clean", Some(_clean_matches)) =>
-      if std::path::Path::new("out/").exists() {
+      if Path::new("out/").exists() {
         println!(":: removing directory 'out/'");
         std::fs::remove_dir_all("out/")
           .expect("!! could not remove directory 'out/', check permissions");
