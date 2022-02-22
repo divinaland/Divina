@@ -17,7 +17,7 @@
   html_favicon_url = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/ribbon_1f380.png"
 )]
 
-use std::{fs, process::Command};
+use std::fs;
 
 use divina_config::Arch;
 
@@ -189,52 +189,36 @@ impl Compiler {
         );
 
         #[cfg(unix)]
-        Command::new(&package.compiler)
-          .args([
-            "-f",
-            if package.arch == Arch::X86 {
-              "elf32"
-            } else {
-              "elf64"
-            },
-            &source.path,
-            "-o",
-            &if self.is_package {
-              format!("out/{}.o", source.filename)
-            } else {
-              format!("out/{}/{}.o", package.name, source.filename)
-            },
-          ])
-          .output()
-          .expect(&format!(
-            "!! failed to call command `{}` in `Compiler.compile`",
-            package.compiler
-          ));
+        unix::compile(
+          &package.compiler,
+          if package.arch == Arch::X86 {
+            "elf32"
+          } else {
+            "elf64"
+          },
+          &source.path,
+          &if self.is_package {
+            format!("out/{}.o", source.filename)
+          } else {
+            format!("out/{}/{}.o", package.name, source.filename)
+          },
+        );
 
         #[cfg(windows)]
-        Command::new(&package.compiler)
-          .args([
-            "-f",
-            if package.arch == Arch::X86 {
-              "win32"
-            } else {
-              "win64"
-            },
-            &source.path,
-            "-o",
-            &if self.is_package {
-              format!("out/{}.obj", source.filename)
-            } else {
-              format!("out/{}/{}.obj", package.name, source.filename)
-            },
-          ])
-          .output()
-          .unwrap_or_else(|_| {
-            panic!(
-              "!! failed to call command `{}` in `Compiler.compile`",
-              package.compiler
-            )
-          });
+        windows::compile(
+          &package.compiler,
+          if package.arch == Arch::X86 {
+            "win32"
+          } else {
+            "win64"
+          },
+          &source.path,
+          &if self.is_package {
+            format!("out/{}.obj", source.filename)
+          } else {
+            format!("out/{}/{}.obj", package.name, source.filename)
+          },
+        );
       }
     }
 
@@ -285,23 +269,16 @@ impl Compiler {
       );
 
       #[cfg(unix)]
-      {
-        Command::new("ld")
-          .args([
-            "-dynamic-linker",
-            "/lib64/ld-linux-x86-64.so.2",
-            "-lc",
-            "-o",
-            &if self.is_package {
-              format!("out/{}", package.name)
-            } else {
-              format!("out/{}/{}", package.name, package.name)
-            },
-          ])
-          .args(filenames.iter())
-          .output()
-          .expect("!! failed to call command `ld` in `Compiler.link`");
-      }
+      unix::link(
+        "ld",
+        "/lib64/ld-linux-x86-64.so.2",
+        &if self.is_package {
+          format!("out/{}", package.name)
+        } else {
+          format!("out/{}/{}", package.name, package.name)
+        },
+        filenames.join(" "),
+      );
 
       #[cfg(windows)]
       {
@@ -330,9 +307,30 @@ impl Compiler {
   }
 }
 
-#[cfg(windows)]
+#[cfg(unix)]
 #[rustfmt::skip] // Preserve raw string literal positions
+mod unix {
+  #[shell]
+  pub fn compile(compiler: &str, architecture: &str, source_path: &str, out_file: &str) -> String { r#"
+    $COMPILER -f $ARCHITECTURE $SOURCE_PATH -o $OUT_FILE
+  "# }
+
+  #[shell]
+  pub fn link(linker: &str, dynamic_linker: &str, out_file: &str, sources: &str) -> String { r#"
+    $LINKER -dynamic-linker $DYNAMIC_LINKER -lc -o $OUT_FILE $SOURCES
+  "# }
+}
+
+#[cfg(windows)]
+#[rustfmt::skip]
 mod windows {
+  use shellfn::shell;
+
+  #[shell(cmd = "powershell")]
+  pub fn compile(compiler: &str, architecture: &str, sources: &str, out_file: &str) -> String { r#"
+    $COMPILER -f $ARCHITECTURE $SOURCES -o $OUT_FILE
+  "# }
+
   /// Thank lord for the [shellfn](https://github.com/synek317/shellfn) crate...
   ///
   /// I unironically spent **SIX** hours -- give or take a few minutes... --
@@ -341,24 +339,24 @@ mod windows {
   /// random search, and it worked!
   ///
   /// Thanks, shellfn.
-  #[shellfn::shell(cmd = "powershell")]
+  #[shell(cmd = "powershell")]
   pub fn link_workspace_32(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
   "# }
-  #[shellfn::shell(cmd = "powershell")]
+  #[shell(cmd = "powershell")]
   pub fn link_workspace_64(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
   "# }
-  #[shellfn::shell(cmd = "powershell")]
+  #[shell(cmd = "powershell")]
   pub fn link_package_32(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
   "# }
-  #[shellfn::shell(cmd = "powershell")]
+  #[shell(cmd = "powershell")]
   pub fn link_package_64(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
   "# }
-  #[shellfn::shell(cmd = "powershell")]
-  pub fn link_package_custom(objects: &str, filename: &str, vs: &str) -> String { r#"
-    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "$VS"
+  #[shell(cmd = "powershell")]
+  pub fn link_package_custom(objects: &str, filename: &str, visual_studio_path: &str) -> String { r#"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "$VISUAL_STUDIO_PATH"
   "# }
 }
