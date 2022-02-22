@@ -3,6 +3,7 @@
 # -------------
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+LIBCLANG_PATH = "D:\\software\\LLVM-12.0.1-win64\\lib"
 
 # ------------
 # | Wrappers |

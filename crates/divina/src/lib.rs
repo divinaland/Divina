@@ -67,9 +67,9 @@ impl Divina {
 pub fn setup() {
   dotenv::dotenv().ok();
   human_panic::setup_panic!(Metadata {
-    version:  env!("CARGO_PKG_VERSION"),
-    name:     env!("CARGO_PKG_NAME"),
-    authors:  env!("CARGO_PKG_AUTHORS"),
-    homepage: env!("CARGO_PKG_HOMEPAGE"),
+    version:  env!("CARGO_PKG_VERSION").into(),
+    name:     env!("CARGO_PKG_NAME").into(),
+    authors:  env!("CARGO_PKG_AUTHORS").into(),
+    homepage: env!("CARGO_PKG_HOMEPAGE").into(),
   });
 }
