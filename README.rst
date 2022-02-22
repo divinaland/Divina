@@ -39,6 +39,13 @@ Usage
 
 Usage documentation is available on `divina.land <https://divina.land>`_.
 
+Examples
+^^^^^^^^
+
+.. raw:: html
+
+  <a href="./examples"><code>examples/</code></a>
+
 Prebuilt Binaries
 """""""""""""""""
 
