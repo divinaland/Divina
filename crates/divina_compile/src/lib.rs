@@ -29,10 +29,11 @@ struct Source {
 
 #[derive(Debug)]
 struct Package {
-  name:     String,
-  sources:  Vec<Source>,
-  arch:     Arch,
-  compiler: String,
+  name:          String,
+  sources:       Vec<Source>,
+  arch:          Arch,
+  compiler:      String,
+  visual_studio: Option<String>,
 }
 
 #[derive(Default, Debug)]
@@ -50,18 +51,19 @@ impl Compiler {
         "!! could not access 'Config.members' from `workspace`, this *shouldn't* be possible",
       ) {
         let mut package = Package {
-          name:     member.name.clone().expect(
+          name:          member.name.clone().expect(
             "!! could not access `Config.?.name` from `workspace`, this *shouldn't* be possible",
           ),
-          sources:  Vec::new(),
-          arch:     member
+          sources:       Vec::new(),
+          arch:          member
             .arch
             .clone()
             .expect("!! could not access 'Config.members.?.arch', this *shouldn't* be possible"),
-          compiler: member
+          compiler:      member
             .compiler
             .clone()
             .unwrap_or_else(|| "yasm".to_string()),
+          visual_studio: member.clone().visual_studio,
         };
 
         member
@@ -97,16 +99,16 @@ impl Compiler {
       }
     } else {
       let mut package = Package {
-        name:     config
+        name:          config
           .name
           .clone()
           .expect("!! could not access `Config.name` from `Package`, this *shouldn't* be possible"),
-        sources:  Vec::new(),
-        arch:     config
+        sources:       Vec::new(),
+        arch:          config
           .arch
           .clone()
           .expect("!! could not access 'Config.arch', this *shouldn't* be possible"),
-        compiler: if config.compiler.is_some() {
+        compiler:      if config.compiler.is_some() {
           config
             .compiler
             .clone()
@@ -114,6 +116,7 @@ impl Compiler {
         } else {
           "yasm".to_string()
         },
+        visual_studio: config.clone().visual_studio,
       };
 
       config
@@ -270,7 +273,7 @@ impl Compiler {
 
       #[cfg(windows)]
       println!(
-        ":: {} @@ entering visual studio 2019 developer command prompt environment",
+        ":: {} @@ entering visual studio developer command prompt environment",
         package.name
       );
 
@@ -302,7 +305,9 @@ impl Compiler {
 
       #[cfg(windows)]
       {
-        if arch == &Arch::X64 {
+        if let Some(visual_studio_path) = &package.visual_studio {
+          windows::link_package_custom(&filenames.join(" "), &package.name, visual_studio_path);
+        } else if arch == &Arch::X64 {
           if self.is_package {
             windows::link_package_64(&filenames.join(" "), &package.name);
           } else {
@@ -351,5 +356,9 @@ mod windows {
   #[shellfn::shell(cmd = "powershell")]
   pub fn link_package_64(objects: &str, filename: &str) -> String { r#"
     "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+  "# }
+  #[shellfn::shell(cmd = "powershell")]
+  pub fn link_package_custom(objects: &str, filename: &str, vs: &str) -> String { r#"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "$VS"
   "# }
 }

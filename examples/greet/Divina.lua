@@ -12,6 +12,7 @@ local name = "greet-" .. tostring(os.time())
 --- @field public compile_options string[]
 --- @field public minimum_divina_version string
 --- @field public sources string[]
+--- @field public visual_studio string
 Package = {
   name = name,
   version = "0.1.0",
@@ -27,6 +28,7 @@ Package = {
   },
   type = Divina.Type.Bin,
   arch = Divina.Arch.x64,
+  visual_studio = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat",
 }
 
 -- http://lua-users.org/wiki/ModulesTutorial

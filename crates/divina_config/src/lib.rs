@@ -186,6 +186,7 @@ pub struct Config {
   pub path:                   Option<String>,
   pub arch:                   Option<Arch>,
   pub compiler:               Option<String>,
+  pub visual_studio:          Option<String>,
 }
 impl Config {
   /// Create a new `Config`
@@ -367,6 +368,14 @@ impl Config {
           (self.compiler),
           GetRequired::No
         );
+        get_or_none!(
+          config_table,
+          "Package",
+          "visual_studio",
+          String,
+          (self.visual_studio),
+          GetRequired::No
+        );
       } else {
         get_table!(workspace_table, "Workspace", globals);
 
@@ -419,6 +428,7 @@ impl Default for Config {
       path:                   None,
       arch:                   None,
       compiler:               None,
+      visual_studio:          None,
     }
   }
 }

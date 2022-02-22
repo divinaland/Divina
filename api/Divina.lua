@@ -25,6 +25,7 @@ function test() end
 --- @field public minimum_divina_version string
 --- @field public sources string[]
 --- @field public compiler string
+--- @field public visual_studio string
 Package = {
   name,
   version,
@@ -35,6 +36,7 @@ Package = {
   type,
   arch,
   compiler,
+  visual_studio,
 }
 
 --- @class Workspace
