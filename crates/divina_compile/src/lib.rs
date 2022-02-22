@@ -338,18 +338,18 @@ mod windows {
   /// Thanks, shellfn.
   #[shellfn::shell(cmd = "powershell")]
   pub fn link_workspace_32(objects: &str, filename: &str) -> String { r#"
-    "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+    "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
   "# }
   #[shellfn::shell(cmd = "powershell")]
   pub fn link_workspace_64(objects: &str, filename: &str) -> String { r#"
-    "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    "link /subsystem:console /out:out/$FILENAME/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
   "# }
   #[shellfn::shell(cmd = "powershell")]
   pub fn link_package_32(objects: &str, filename: &str) -> String { r#"
-    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
   "# }
   #[shellfn::shell(cmd = "powershell")]
   pub fn link_package_64(objects: &str, filename: &str) -> String { r#"
-    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    "link /subsystem:console /out:out/$FILENAME.exe $OBJECTS kernel32.lib msvcrt.lib legacy_stdio_definitions.lib" | cmd /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
   "# }
 }
