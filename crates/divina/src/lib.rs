@@ -32,7 +32,7 @@ mod cli;
 use divina_compile::Compiler;
 use divina_config::Config;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Divina {
   config:   Config,
   compiler: Compiler,
@@ -58,7 +58,7 @@ impl Divina {
   }
 
   #[must_use]
-  pub const fn expose_config(&self) -> &Config { &self.config }
+  pub fn expose_config(&self) -> Config { self.config.clone() }
 
   pub fn configure_compiler(&mut self, compiler: Compiler) { self.compiler = compiler; }
 }

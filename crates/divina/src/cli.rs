@@ -69,7 +69,7 @@ pub fn execute(divina: &mut crate::Divina) {
     ("build", Some(_build_matches)) => {
       divina
         .compiler
-        .find_sources(&divina.expose_config().clone())
+        .find_sources(divina.expose_config())
         .compile()
         .link();
     }
@@ -90,7 +90,7 @@ pub fn execute(divina: &mut crate::Divina) {
             ("show", _) => {
               let _ = divina
                 .compiler
-                .find_sources(&divina.expose_config().clone())
+                .find_sources(divina.expose_config())
                 .print_config();
             }
             _ => unreachable!(),

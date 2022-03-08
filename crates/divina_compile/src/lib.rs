@@ -21,13 +21,13 @@ use std::fs;
 
 use divina_config::Arch;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Source {
   filename: String,
   path:     String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Package {
   name:          String,
   sources:       Vec<Source>,
@@ -36,7 +36,7 @@ struct Package {
   visual_studio: Option<String>,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Compiler {
   sources:    Vec<Package>,
   is_package: bool,
@@ -45,25 +45,21 @@ impl Compiler {
   #[must_use]
   pub fn new() -> Self { Self::default() }
 
-  pub fn find_sources(&mut self, config: &divina_config::Config) -> &Self {
+  pub fn find_sources(&mut self, config: divina_config::Config) -> &Self {
     if config.config_type == divina_config::ConfigType::Workspace {
-      for member in config.members.as_ref().expect(
+      for member in config.members.expect(
         "!! could not access 'Config.members' from `workspace`, this *shouldn't* be possible",
       ) {
         let mut package = Package {
-          name:          member.name.clone().expect(
+          name:          member.name.expect(
             "!! could not access `Config.?.name` from `workspace`, this *shouldn't* be possible",
           ),
           sources:       Vec::new(),
           arch:          member
             .arch
-            .clone()
             .expect("!! could not access 'Config.members.?.arch', this *shouldn't* be possible"),
-          compiler:      member
-            .compiler
-            .clone()
-            .unwrap_or_else(|| "yasm".to_string()),
-          visual_studio: member.clone().visual_studio,
+          compiler:      member.compiler.unwrap_or_else(|| "yasm".to_string()),
+          visual_studio: member.visual_studio,
         };
 
         member
@@ -101,22 +97,19 @@ impl Compiler {
       let mut package = Package {
         name:          config
           .name
-          .clone()
           .expect("!! could not access `Config.name` from `Package`, this *shouldn't* be possible"),
         sources:       Vec::new(),
         arch:          config
           .arch
-          .clone()
           .expect("!! could not access 'Config.arch', this *shouldn't* be possible"),
         compiler:      if config.compiler.is_some() {
           config
             .compiler
-            .clone()
             .expect("!! could not access 'Config.compiler', this *shouldn't be possible")
         } else {
           "yasm".to_string()
         },
-        visual_studio: config.clone().visual_studio,
+        visual_studio: config.visual_studio,
       };
 
       config
