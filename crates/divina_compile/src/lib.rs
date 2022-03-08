@@ -277,7 +277,7 @@ impl Compiler {
         } else {
           format!("out/{}/{}", package.name, package.name)
         },
-        filenames.join(" "),
+        &filenames.join(" "),
       );
 
       #[cfg(windows)]
@@ -310,6 +310,8 @@ impl Compiler {
 #[cfg(unix)]
 #[rustfmt::skip] // Preserve raw string literal positions
 mod unix {
+  use shellfn::shell;
+
   #[shell]
   pub fn compile(compiler: &str, architecture: &str, source_path: &str, out_file: &str) -> String { r#"
     $COMPILER -f $ARCHITECTURE $SOURCE_PATH -o $OUT_FILE
