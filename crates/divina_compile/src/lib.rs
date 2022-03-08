@@ -33,6 +33,7 @@ struct Package {
   sources:       Vec<Source>,
   arch:          Arch,
   compiler:      String,
+  #[allow(unused)]
   visual_studio: Option<String>,
 }
 
