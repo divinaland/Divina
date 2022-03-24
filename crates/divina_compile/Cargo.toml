@@ -10,7 +10,6 @@ repository = "https://github.com/divinaland/Divina"
 license = "GPL-3.0-only"
 keywords = ["divina", "buildsystem", "build", "assembly", "asm", "nasm", "yasm"]
 categories = ["development-tools::build-utils", "development-tools"]
-publish = false
 
 [dependencies]
 # Configuration
