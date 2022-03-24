@@ -9,7 +9,7 @@ homepage = "https://divina.land"
 repository = "https://github.com/divinaland/Divina"
 license = "GPL-3.0-only"
 keywords = ["divina", "build", "asm", "nasm", "yasm"]
-categories = ["command-line-utilites", "development-tools"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 git2 = "0.13.25"
