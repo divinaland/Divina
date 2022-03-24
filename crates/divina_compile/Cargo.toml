@@ -13,7 +13,7 @@ categories = ["development-tools::build-utils", "development-tools"]
 
 [dependencies]
 # Configuration
-divina_config = { path = "../divina_config" }
+divina_config = { version = "0.1.0", path = "../divina_config" }
 
 # Command-line
 shellfn = "0.1.1"

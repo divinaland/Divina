@@ -16,4 +16,4 @@ categories = ["config"]
 rlua = "0.19.0"
 
 # Utility
-divina_util = { path = "../divina_util" }
+divina_util = { version = "0.1.0", path = "../divina_util" }

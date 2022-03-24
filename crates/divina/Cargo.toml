@@ -16,10 +16,10 @@ categories = ["development-tools::build-utils"]
 structopt = "0.3.26"
 
 # Configuration
-divina_config = { path = "../divina_config" }
+divina_config = { version = "0.1.0", path = "../divina_config" }
 
 # Git
-divina_git = { path = "../divina_git" }
+divina_git = { version = "0.1.0", path = "../divina_git" }
 
 # Environment
 dotenv = "0.15.0"
@@ -33,10 +33,10 @@ tokio = { version = "0.3.7", features = ["full"] }
 human-panic = "1.0.3"
 
 # Compilation
-divina_compile = { path = "../divina_compile" }
+divina_compile = { version = "0.1.0", path = "../divina_compile" }
 
 # Utility
-divina_util = { path = "../divina_util" }
+divina_util = { version = "0.1.0", path = "../divina_util" }
 
 [target.'cfg(windows)'.dependencies]
 # Allocator
